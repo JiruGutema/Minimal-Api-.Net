@@ -1,0 +1,21 @@
+# Build results
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+
+# Rider settings
+.idea/
+
+secrets.json
+
+# Dotnet tools
+*.db
+
+# Others
+*.log
