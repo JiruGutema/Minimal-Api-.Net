@@ -1,5 +1,6 @@
-var builder = WebApplication.CreateBuilder(args);
+using Models;
 
+var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
@@ -9,22 +10,8 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
-
-List<Book> books = new()
-{
-    new Book
-    {
-        Id = 1,
-        Title = "The Great Gatsby",
-        Author = "F. Scott Fitzgerald",
-    },
-    new Book
-    {
-        Id = 2,
-        Title = "To Kill a Mockingbird",
-        Author = "Jiru Gutema",
-    },
-};
+Data data = new Data();
+List<Book> books = data.GetBooks();
 
 app.MapGet(
     "/",
@@ -54,15 +41,18 @@ app.MapGet(
 
 app.MapPost(
     "/books",
-    (int id, string title, string Author) =>
+    (Book book) =>
     {
-        Console.WriteLine($"Creating book with id: {id}, title: {title}, author: {Author}");
+        int id = book.Id;
+        string title = book.Title;
+        string author = book.Author;
+        Console.WriteLine($"Creating book with id: {id}, title: {title}, author: {author}");
 
         Book newBook = new()
         {
             Id = id,
-            Title = title,
-            Author = Author,
+            Title = title, 
+            Author = author
         };
         books.Add(newBook);
         return books;
@@ -70,10 +60,3 @@ app.MapPost(
 );
 app.UseHttpsRedirection();
 app.Run();
-
-class Book
-{
-    public int Id { get; set; }
-    public required string Title { get; set; }
-    public required string Author { get; set; }
-}
