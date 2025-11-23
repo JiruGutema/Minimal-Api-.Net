@@ -2,6 +2,8 @@ using Models;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
@@ -9,6 +11,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 Data data = new Data();
 List<Book> books = data.GetBooks();
@@ -51,12 +55,13 @@ app.MapPost(
         Book newBook = new()
         {
             Id = id,
-            Title = title, 
-            Author = author
+            Title = title,
+            Author = author,
         };
         books.Add(newBook);
         return books;
     }
 );
+
 app.UseHttpsRedirection();
 app.Run();
