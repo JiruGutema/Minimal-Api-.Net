@@ -21,7 +21,7 @@ app.MapGet(
     "/",
     () =>
     {
-        return "OK";
+        return Results.Ok("The servier is up and running!");
     }
 );
 app.MapGet(
@@ -29,7 +29,12 @@ app.MapGet(
     () =>
     {
         Console.WriteLine("Fetching all books");
-        return books;
+        if (books.Count == 0)
+        {
+            return Results.NotFound("No books available now!");
+        }
+
+        return Results.Ok(books);
     }
 );
 
@@ -37,9 +42,14 @@ app.MapGet(
     "/books/{id}",
     (int id) =>
     {
-        Console.WriteLine($"returning books with id: {id}");
-        var book = books.Where(b => b.Id == id);
-        return book;
+        Console.WriteLine("Retriving book with id: ", id);
+        var book = books.Find(b => b.Id == id);
+        if (book is null)
+        {
+            return Results.NotFound("Sorry, There server couldn't be able to find the book!");
+        }
+
+        return Results.Ok(book);
     }
 );
 
@@ -59,7 +69,30 @@ app.MapPost(
             Author = author,
         };
         books.Add(newBook);
-        return books;
+        return Results.Ok(books);
+    }
+);
+app.MapDelete(
+    "/books/{id}",
+    (int id) =>
+    {
+        // firt find the existance of the book specified.
+        var bookToBeDeleted = books.Find(book => book.Id == id);
+        // return 404 if not found
+        if (bookToBeDeleted is null)
+        {
+            return Results.NotFound("The book not found!");
+        }
+        else
+        {
+            var deleted = books.Remove(bookToBeDeleted);
+            Console.WriteLine(deleted);
+            if (!deleted)
+            {
+                return Results.InternalServerError("Unable to delete the book");
+            }
+            return Results.Ok(books);
+        }
     }
 );
 
