@@ -15,7 +15,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 Data data = new Data();
+
 List<Book> books = data.GetBooks();
+List<User> users = data.GetUsers();
 
 app.MapGet(
     "/",
@@ -25,7 +27,7 @@ app.MapGet(
     }
 );
 app.MapGet(
-    "books",
+    "/api/books",
     () =>
     {
         Console.WriteLine("Fetching all books");
@@ -39,7 +41,7 @@ app.MapGet(
 );
 
 app.MapGet(
-    "/books/{id}",
+    "/api/books/{id}",
     (int id) =>
     {
         Console.WriteLine("Retriving book with id: ", id);
@@ -54,7 +56,7 @@ app.MapGet(
 );
 
 app.MapPost(
-    "/books",
+    "/api/books",
     (Book book) =>
     {
         int id = book.Id;
@@ -73,7 +75,7 @@ app.MapPost(
     }
 );
 app.MapDelete(
-    "/books/{id}",
+    "/api/books/{id}",
     (int id) =>
     {
         // firt find the existance of the book specified.
@@ -93,6 +95,98 @@ app.MapDelete(
             }
             return Results.Ok(books);
         }
+    }
+);
+app.MapGet(
+    "/api/user/{id}",
+    (int id) =>
+    {
+        var user = users.Find(user => user.Id == id);
+        if (user is null)
+        {
+            return Results.NotFound("User not found!");
+        }
+        else
+        {
+            return Results.Ok(user);
+        }
+    }
+);
+
+app.MapGet(
+    "/api/users",
+    () =>
+    {
+        return Results.Ok(users);
+    }
+);
+
+app.MapPost(
+    "api/login",
+    (Login Req) =>
+    {
+        string email = Req.email;
+        string password = Req.password;
+        var checkPasswrod = users.Find(user => user.email == email);
+
+        if (checkPasswrod is null)
+        {
+            return Results.NotFound("User not found");
+        }
+
+        var user = users.Find(user => user.email == email && user.password == password);
+        if (user is null)
+        {
+            return Results.Unauthorized();
+        }
+        else
+        {
+            var response = new
+            {
+                message = "Login Successfull",
+                token = "thisfaketoken",
+                username = user.name,
+                email = user.email,
+            };
+            return Results.Ok(response);
+        }
+    }
+);
+
+app.MapPost(
+    "api/signup",
+    (Singup Req) =>
+    {
+        string email = Req.email;
+        string password = Req.password;
+        string name = Req.name;
+        int id = users.Count;
+
+        var checkId = users.Find(user => user.Id == id);
+
+        if (checkId is not null)
+        {
+            id += 1;
+        }
+
+        User user = new User
+        {
+            Id = id,
+            name = name,
+            email = email,
+            password = password,
+        };
+        users.Add(user);
+
+        var response = new
+        {
+            message = "Login Successfull",
+            token = "thisfaketoken",
+            username = user.name,
+            Id = user.Id,
+            email = user.email,
+        };
+        return Results.Ok(response);
     }
 );
 

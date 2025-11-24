@@ -1,4 +1,5 @@
 using Models;
+
 public class Data
 {
     private List<Book> books = new()
@@ -17,7 +18,31 @@ public class Data
         },
     };
 
-    public List<Book> GetBooks(){
-      return books;
+    private List<User> users = new()
+    {
+        new User
+        {
+            Id = 1,
+            name = "Jiru Gutema",
+            password = "fakepassword",
+            email = "jirudagutema@gmail.com",
+        },
+        new User
+        {
+            Id = 2,
+            name = "Chala Gutema",
+            password = "fakepassword",
+            email = "chalagutema@gmail.com",
+        },
+    };
+
+    public List<Book> GetBooks()
+    {
+        return books;
+    }
+
+    public List<User> GetUsers()
+    {
+        return users;
     }
 }
