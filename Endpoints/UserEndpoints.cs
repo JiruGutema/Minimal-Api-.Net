@@ -1,21 +1,22 @@
-using Models;
+using System.Threading.Tasks;
 using DTO;
+using Microsoft.EntityFrameworkCore;
+using Models;
 
 namespace EndPoints
 {
     public class UserEndPoints
     {
-        private Data data = new Data();
-        private List<User> users;
+        private readonly AppDb _db;
 
-        public UserEndPoints()
+        public UserEndPoints(AppDb db)
         {
-            users = data.GetUsers();
+            _db = db;
         }
 
-        public IResult GetUserById(int id)
+        public async Task<IResult> GetUserById(int id)
         {
-            var user = users.Find(user => user.Id == id);
+            var user = await _db.users.FindAsync(id);
             if (user is null)
             {
                 return Results.NotFound("User not found!");
@@ -26,23 +27,24 @@ namespace EndPoints
             }
         }
 
-        public IResult GetAllUsers()
+        public async Task<IResult> GetAllUsers()
         {
-            return Results.Ok(users);
+            return Results.Ok(await _db.users.ToListAsync());
         }
 
-        public IResult Login(Login Req)
+        public async Task<IResult> Login(Login Req)
         {
             string email = Req.email;
             string password = Req.password;
-            var checkPasswrod = users.Find(user => user.email == email);
-
-            if (checkPasswrod is null)
+            var user = await _db.users.FirstOrDefaultAsync(u => u.email == email);
+            if (user is null)
             {
                 return Results.NotFound("User not found");
             }
 
-            var user = users.Find(user => user.email == email && user.password == password);
+            var check = _db.users.FirstOrDefaultAsync(u =>
+                u.email == email && u.password == password
+            );
             if (user is null)
             {
                 return Results.Unauthorized();
@@ -60,15 +62,13 @@ namespace EndPoints
             }
         }
 
-        public IResult Signup(Singup Req)
+        public async Task<IResult> Signup(Singup Req)
         {
             string email = Req.email;
             string password = Req.password;
             string name = Req.name;
-            int id = users.Count;
-
-            var checkId = users.Find(user => user.Id == id);
-
+            int id = _db.users.Count() + 1;
+            var checkId = _db.users.FirstOrDefaultAsync(user => user.Id == id);
             if (checkId is not null)
             {
                 id += 1;
@@ -81,7 +81,9 @@ namespace EndPoints
                 email = email,
                 password = password,
             };
-            users.Add(user);
+
+            _db.users.Add(user);
+            await _db.SaveChangesAsync();
 
             var response = new
             {

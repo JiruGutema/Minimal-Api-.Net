@@ -28,7 +28,7 @@ var scope = app.Services.CreateScope();
 var db = scope.ServiceProvider.GetRequiredService<AppDb>();
 
 EndPoints.BookEndpoints bookEndpoints = new EndPoints.BookEndpoints(db);
-EndPoints.UserEndPoints userEndPoints = new EndPoints.UserEndPoints();
+EndPoints.UserEndPoints userEndPoints = new EndPoints.UserEndPoints(db);
 EndPoints.HealthEndpoints healthEndpoints = new EndPoints.HealthEndpoints();
 // endpoints
 app.MapGet("/", healthEndpoints.GetRootEndpoint);
@@ -38,8 +38,8 @@ app.MapPost("/api/books", (Book book) => bookEndpoints.CreateBook(book));
 app.MapDelete("/api/books/{id}", (int id) => bookEndpoints.DeleteBook(id));
 app.MapGet("/api/user/{id}", (int id) => userEndPoints.GetUserById(id));
 app.MapGet("/api/users", userEndPoints.GetAllUsers);
-app.MapPost("api/login", (Login Req) => userEndPoints.Login(Req));
-app.MapPost("api/signup", (Singup Req) => userEndPoints.Signup(Req));
+app.MapPost("/api/login", (Login Req) => userEndPoints.Login(Req));
+app.MapPost("/api/signup", (Singup Req) => userEndPoints.Signup(Req));
 app.UseHttpsRedirection();
 app.Run();
 
