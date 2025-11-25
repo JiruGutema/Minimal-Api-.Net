@@ -1,4 +1,5 @@
 using Models;
+using DTO;
 
 namespace EndPoints
 {
