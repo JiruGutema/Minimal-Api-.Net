@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+//import a scope here 
 using Models;
 using DTO;
 
@@ -7,6 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddDbContext<AppDb>(options =>
+    options.UseSqlite("Data Source=app.db"));
 
 //App
 var app = builder.Build();
@@ -20,7 +24,10 @@ if (app.Environment.IsDevelopment())
 }
 
 Data data = new Data();
-EndPoints.BookEndpoints bookEndpoints = new EndPoints.BookEndpoints();
+var scope = app.Services.CreateScope();
+var db = scope.ServiceProvider.GetRequiredService<AppDb>();
+
+EndPoints.BookEndpoints bookEndpoints = new EndPoints.BookEndpoints(db);
 EndPoints.UserEndPoints userEndPoints = new EndPoints.UserEndPoints();
 EndPoints.HealthEndpoints healthEndpoints = new EndPoints.HealthEndpoints();
 // endpoints

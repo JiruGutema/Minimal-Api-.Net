@@ -1,20 +1,21 @@
+using Microsoft.EntityFrameworkCore;
 using Models;
 
 namespace EndPoints
 {
     public class BookEndpoints
     {
-        private Data data = new Data();
-        private List<Book> books;
+        private readonly AppDb _db;
 
-        public BookEndpoints()
+        public BookEndpoints(AppDb db)
         {
-            books = data.GetBooks();
+            _db = db;
         }
 
-        public IResult GetAllBooks()
+        public async Task<IResult> GetAllBooks()
         {
             Console.WriteLine("Fetching all books");
+            List<Book> books = await _db.Books.ToListAsync();
             if (books.Count == 0)
             {
                 return Results.NotFound("No books available now!");
@@ -22,10 +23,11 @@ namespace EndPoints
             return Results.Ok(books);
         }
 
-        public IResult GetBookById(int id)
+        public async Task<IResult> GetBookById(int id)
         {
             Console.WriteLine($"Retrieving book with id: {id}");
-            var book = books.Find(b => b.Id == id);
+
+            Book? book = await _db.Books.FindAsync(id);
             if (book is null)
             {
                 return Results.NotFound("Sorry, the server couldn't find the book!");
@@ -33,37 +35,23 @@ namespace EndPoints
             return Results.Ok(book);
         }
 
-        public IResult CreateBook(Book book)
+        public async Task<IResult> CreateBook(Book book)
         {
-            int id = book.Id;
-            string title = book.Title;
-            string author = book.Author;
-            Console.WriteLine($"Creating book with id: {id}, title: {title}, author: {author}");
-
-            Book newBook = new()
-            {
-                Id = id,
-                Title = title,
-                Author = author,
-            };
-            books.Add(newBook);
-            return Results.Ok(books);
+            _db.Books.Add(book);
+            await _db.SaveChangesAsync();
+            return Results.Ok(book);
         }
 
-        public IResult DeleteBook(int id)
+        public async Task<IResult> DeleteBook(int id)
         {
-            var bookToBeDeleted = books.Find(book => book.Id == id);
+            var bookToBeDeleted = await _db.Books.FindAsync(id);
             if (bookToBeDeleted is null)
             {
                 return Results.NotFound("The book not found!");
             }
-            var deleted = books.Remove(bookToBeDeleted);
-            Console.WriteLine(deleted);
-            if (!deleted)
-            {
-                return Results.StatusCode(500);
-            }
-            return Results.Ok(books);
+            _db.Books.Remove(bookToBeDeleted);
+            await _db.SaveChangesAsync();
+            return Results.Ok();
         }
     }
 }
