@@ -1,0 +1,1 @@
+This is just text from the text file in the wwwroot folder in dotnet

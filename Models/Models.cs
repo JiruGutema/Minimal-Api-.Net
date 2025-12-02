@@ -15,4 +15,12 @@ namespace Models
         public required string password { get; set; }
     }
 
+    public class Author {
+      public int Id {get; set; }
+      public required string Name {get; set; } 
+      public required string Bio {get; set; }
+      public required int BookId {get; set; }
+
+    }
+
 }

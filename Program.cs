@@ -1,7 +1,7 @@
-using Microsoft.EntityFrameworkCore;
-//import a scope here 
-using Models;
 using DTO;
+using Microsoft.EntityFrameworkCore;
+//import a scope here
+using Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,8 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<AppDb>(options =>
-    options.UseSqlite("Data Source=app.db"));
+builder.Services.AddDbContext<AppDb>(options => options.UseSqlite("Data Source=app.db"));
 
 //App
 var app = builder.Build();
@@ -22,6 +21,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseStaticFiles();
+app.UseWelcomePage("/welcome");
 
 Data data = new Data();
 var scope = app.Services.CreateScope();
@@ -30,6 +31,15 @@ var db = scope.ServiceProvider.GetRequiredService<AppDb>();
 EndPoints.BookEndpoints bookEndpoints = new EndPoints.BookEndpoints(db);
 EndPoints.UserEndPoints userEndPoints = new EndPoints.UserEndPoints(db);
 EndPoints.HealthEndpoints healthEndpoints = new EndPoints.HealthEndpoints();
+var api = app.MapGroup("/api");
+api.MapGet(
+    "/api",
+    () =>
+    {
+        Results.Ok("API is working");
+    }
+);
+
 // endpoints
 app.MapGet("/", healthEndpoints.GetRootEndpoint);
 app.MapGet("/api/books", bookEndpoints.GetAllBooks);
@@ -42,4 +52,3 @@ app.MapPost("/api/login", (Login Req) => userEndPoints.Login(Req));
 app.MapPost("/api/signup", (Singup Req) => userEndPoints.Signup(Req));
 app.UseHttpsRedirection();
 app.Run();
-

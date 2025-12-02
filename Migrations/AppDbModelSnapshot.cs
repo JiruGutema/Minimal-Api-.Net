@@ -25,8 +25,7 @@ namespace BookStoreApi.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
+                    b.Property<string>("Title") .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
